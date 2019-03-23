@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Title of the document</title>
+    <script>
+        document.addEventListener("DOMContentLoaded", start);
+        var galleryDiv;
+        var imagesContainer;
+        var galleryWidth = 400;
+        var galleryHeight = 300;
+        var body;
+        var imagesArray = ["images/1.jpg", "images/2.jpg", "images/3.jpg", "images/4.jpg", "images/5.jpeg", "images/6.jpg", "images/7.jpg", "images/8.jpg"];
+        var currentImage = 0;
+        var interval = 2000;
+        var buttonsDiv;
+        var intervalReference;
+        var prevBtn;
+        var nextBtn;
+        //var imagesContainerX = 0;
+        //var imageContainerWidth;
+
+
+        function start() {
+            body = document.body;
+
+            createGallery();
+            loadImages();
+            startAnimation();
+            createButtons();
+            createPrevNextButton();
+        }
+
+        function createPrevNextButton() {
+            prevBtn = document.createElement("div");
+            nextBtn = document.createElement("div");
+
+            prevBtn.className = "prevBtn";
+            nextBtn.className = "nextBtn";
+
+            prevBtn.addEventListener("click", prevClick);
+            nextBtn.addEventListener("click", nextClick);
+
+            galleryDiv.appendChild(prevBtn);
+            galleryDiv.appendChild(nextBtn);
+            
+        }
+
+        function prevClick(e) {
+            buttonsDiv.childNodes[currentImage].classList.remove("selectedButton");
+            currentImage--;
+            if (currentImage < 0) {
+                currentImage = imagesArray.length - 1;
+            }
+            buttonsDiv.childNodes[currentImage].classList.add("selectedButton");
+            imagesContainer.style.left = `${currentImage * -1 * galleryWidth}px`;
+            startAnimation();
+        }
+
+        function nextClick(e) {
+            buttonsDiv.childNodes[currentImage].classList.remove("selectedButton");
+            currentImage++;
+            if (currentImage > imagesArray.length - 1) {
+                currentImage = 0;
+            }
+            buttonsDiv.childNodes[currentImage].classList.add("selectedButton");
+            imagesContainer.style.left = `${currentImage * -1 * galleryWidth}px`;
+            startAnimation();
+        }
+
+        function startAnimation() {
+            clearInterval(intervalReference);
+            intervalReference = setInterval(moveImages, interval)
+        }
+
+        function createButtons() {
+            var buttonDiv;
+            buttonsDiv = document.createElement("div");
+            buttonsDiv.className = "buttons";
+            for (var i = 0; i < imagesArray.length; i++) {
+                buttonDiv = document.createElement("div");
+                buttonDiv.className = "button";
+                buttonDiv.setAttribute("data-index", i);
+                buttonDiv.addEventListener("click", buttonClick);
+                buttonsDiv.appendChild(buttonDiv);
+            }
+            buttonsDiv.childNodes[0].classList.add("selectedButton");
+            galleryDiv.appendChild(buttonsDiv);
+        }
+
+        function buttonClick(e) {
+            var index = e.target.getAttribute("data-index");
+            buttonsDiv.childNodes[currentImage].classList.remove("selectedButton");
+            currentImage = parseInt(index);
+            imagesContainer.style.left = `${currentImage * -1 * galleryWidth}px`;
+            buttonsDiv.childNodes[currentImage].classList.add("selectedButton");
+            startAnimation();
+        }
+
+        function moveImages() {
+
+            // if (currentImage > 0) {
+            //     let prevImage = imagesContainer.childNodes[currentImage - 1];
+            //     prevImage.style.left = imageContainerWidth + "px";
+            //     imageContainerWidth += galleryWidth;
+            // }
+            buttonsDiv.childNodes[currentImage].classList.remove("selectedButton");
+            currentImage++;
+            
+            if (currentImage > imagesArray.length - 1) {
+                currentImage = 0;
+            }
+            buttonsDiv.childNodes[currentImage].classList.add("selectedButton");
+            imagesContainer.style.left = `${currentImage * -1 * galleryWidth}px`;
+            // imagesContainerX -= galleryWidth;
+            // imagesContainer.style.left = `${imagesContainerX}px`;
+        }
+
+        function createGallery() {
+            //imageContainerWidth = imagesArray.length * galleryWidth;
+            galleryDiv = document.createElement("div");
+            imagesContainer = document.createElement("div");
+
+            galleryDiv.className = "gallery";
+            galleryDiv.style.width = `${galleryWidth}px`;
+            galleryDiv.style.height = `${galleryHeight}px`;
+
+            imagesContainer.className = "imagesContainer";
+            imagesContainer.style.width = `${galleryWidth}px`;
+            imagesContainer.style.height = `${galleryHeight}px`;
+            imagesContainer.style.left = 0;
+
+
+            body.appendChild(galleryDiv);
+            galleryDiv.appendChild(imagesContainer);
+        }
+
+        function loadImages() {
+            var imageDiv;
+            var image;
+            for (var i = 0; i < imagesArray.length; i++) {
+                imageDiv = document.createElement("div");
+                image = new Image();
+                image.src = imagesArray[i];
+                image.addEventListener("load", imageLoaded);
+                imageDiv.appendChild(image);
+
+                imagesContainer.appendChild(imageDiv);
+                imageDiv.style.position = "absolute";
+                imageDiv.style.width = `${galleryWidth}px`;
+                imageDiv.style.height = `${galleryHeight}px`;
+                imageDiv.style.left = `${i * galleryWidth}px`;
+                imageDiv.style.top = 0;
+                imageDiv.style.background = `#${parseInt(Math.random() * 0xffffff).toString(16)}`;
+
+            }
+        }
+
+        function imageLoaded(e) {
+            console.log(e.target)
+            //e.target.style.maxWidth = "100%";
+            // e.target.style.maxHeight = "100%";
+            var width = e.target.width;
+            var height = e.target.height;
+
+
+            if (width > galleryWidth || height > galleryHeight) {
+                var ratioW = galleryWidth /  e.target.width;
+                var ratioH = galleryHeight /  e.target.height;
+
+                var ratio = Math.min(ratioW, ratioH);
+
+                e.target.width = width * ratio;
+                e.target.height = height * ratio;
+            }
+
+            e.target.style.position = "absolute";
+            e.target.style.left = `${galleryWidth / 2 - e.target.width / 2}px`;
+            e.target.style.top = `${galleryHeight / 2 - e.target.height / 2}px`;
+
+        }
+    </script>
+    <style>
+        .gallery {
+            margin: 200px;
+            display: inline-block;
+            position: relative;
+            width: 50px;
+            height: 50px;
+            background: black;
+            overflow: hidden;
+        }
+
+        .imagesContainer {
+            position: absolute;
+            display: inline-block;
+            transition: left .5s;
+        }
+
+        .buttons {
+            /* background: red; */
+            display: inline-block;
+            height: 10px;
+            position: absolute;
+            bottom: 50px;
+            margin-left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .button {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: black;
+            margin-right: 10px;
+        }
+        .selectedButton {
+            background: white;
+        }
+
+        .prevBtn {
+            display: inline-block;
+            width: 50px;
+            height: 50px;
+            background: red;
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .nextBtn {
+            display: inline-block;
+            width: 50px;
+            height: 50px;
+            background: red;
+            position: absolute;
+            top: 50%;
+            right: 0;
+            transform: translateY(-50%);
+        }
+    </style>
+</head>
+
+<body>
+
+</body>
+
+</html>
